@@ -1,6 +1,7 @@
 package com.readcsb.frontend;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -9,25 +10,24 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 
 
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 
-import javax.swing.plaf.multi.MultiListUI;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Route("")
+@Configuration
 public class CSVUpload extends VerticalLayout {
 
 
@@ -44,12 +44,18 @@ public class CSVUpload extends VerticalLayout {
                 String fileName = event.getFileName();
                 InputStream inputStream = buffer.getInputStream(fileName);
 
-
-
+                save.addClickListener(Click-> {
+                    try {
+                        sentBackEnd(inputStream);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
               //  System.out.println("File Name is "+fileName+", length is "+contentLength+" mime Type is : "+mimeType);
-               save.addClickListener(Click->sentBackEnd(upload));
-
             });
+
             add(upload,save);
     }
 
@@ -61,28 +67,56 @@ public class CSVUpload extends VerticalLayout {
        return new HorizontalLayout(save);
     }
 
-    private void sentBackEnd(Upload file){
+
+    private void sentBackEnd(InputStream file) throws IOException {
+
+       List<CustomerRequest> getList= CsvTOCustomer(file);
+
+        RestTemplate restTemplate= new RestTemplate();
+
+        String serverUrl="http://localhost:8082/csv/upload-csv";
+
+        String getResponse= restTemplate.postForObject(serverUrl,getList,String.class);
+
+        System.out.println("Your response Type is : "+getResponse);
 
 
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", file);
-
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity
-                = new HttpEntity<>(body, headers);
-
-        System.out.println("This is from back end method before api call");
-        String serverUrl = "http://localhost:8082/csv/upload-csv";
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate
-                .postForEntity(serverUrl, requestEntity, String.class);
-        System.out.println("This is from back end method after api call");
-        System.out.println("Your application response is : "+response);
     }
+
+
+
+    public List<CustomerRequest> CsvTOCustomer(InputStream file) throws IOException {
+
+
+
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file, "UTF-8"));
+
+
+        CSVFormat format = CSVFormat.RFC4180.builder().setAllowMissingColumnNames(true).
+                setHeader("Name","Employees","Rating").setSkipHeaderRecord(true).build();
+
+        CSVParser csvParser = new CSVParser(bufferedReader, format);
+
+        List<CustomerRequest> customerList= new ArrayList<>();
+
+        for (CSVRecord record : csvParser) {
+
+            String name= record.get(0);
+
+            String empValue= record.get(1);
+            empValue=empValue.trim();
+            int employees = Integer.valueOf(empValue);
+            double rating= Double.parseDouble(record.get(2));
+
+            CustomerRequest customerRequest = new CustomerRequest();
+            customerRequest.setName(name);
+            customerRequest.setEmployees(employees);
+            customerRequest.setRating(rating);
+
+            customerList.add(customerRequest);
+        }
+        return customerList;
+    }
+
 
 }
