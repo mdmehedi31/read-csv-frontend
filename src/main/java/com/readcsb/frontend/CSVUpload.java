@@ -19,6 +19,9 @@ import org.apache.commons.csv.CSVRecord;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -47,6 +50,7 @@ public class CSVUpload extends VerticalLayout {
                 save.addClickListener(Click-> {
                     try {
                         sentBackEnd(inputStream);
+                        getAllCustomer();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
@@ -56,15 +60,15 @@ public class CSVUpload extends VerticalLayout {
               //  System.out.println("File Name is "+fileName+", length is "+contentLength+" mime Type is : "+mimeType);
             });
 
-            add(upload,save);
+
+            add(upload,save,grid);
     }
 
 
-    private Component buttonLayout(){
-         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-         save.addClickShortcut(Key.ENTER);
 
-       return new HorizontalLayout(save);
+    private void listView(){
+            grid.setColumns("Name","Employees","Rating");
+        grid.asSingleSelect().addValueChangeListener(event ->event.getValue());
     }
 
 
@@ -83,6 +87,29 @@ public class CSVUpload extends VerticalLayout {
 
     }
 
+
+
+    public List<CustomerResponse> getAllCustomer(){
+
+            RestTemplate restTemplate = new RestTemplate();
+
+            List<CustomerResponse> getCustomerList= new ArrayList<>();
+            String serverUrl= "http://localhost:8082/csv/get-all-customer";
+
+        ResponseEntity<List<CustomerResponse>> customerList= restTemplate.exchange(serverUrl, HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerResponse>>(){});
+
+        List<CustomerResponse> responses = customerList.getBody();
+
+        int i=1;
+        for (CustomerResponse response1: responses){
+
+            System.out.println(i+" th  Name "+response1.getName()+", Employees "+response1.getEmployees()+", Rating "+response1.getRating());
+
+            i++;
+        }
+
+        return responses;
+    }
 
 
     public List<CustomerRequest> CsvTOCustomer(InputStream file) throws IOException {
