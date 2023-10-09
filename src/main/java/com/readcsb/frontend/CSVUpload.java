@@ -2,14 +2,11 @@ package com.readcsb.frontend;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.shared.util.SharedUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -36,7 +33,7 @@ public class CSVUpload extends VerticalLayout {
 
     Button save = new Button("Save");
 
-    private final Grid<String[]> grid = new Grid<>();
+    private final Grid<CustomerResponse> grid = new Grid<>(CustomerResponse.class);
 
         public CSVUpload() {
 
@@ -50,7 +47,7 @@ public class CSVUpload extends VerticalLayout {
                 save.addClickListener(Click-> {
                     try {
                         sentBackEnd(inputStream);
-                        getAllCustomer();
+                        getAllList();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
@@ -59,6 +56,7 @@ public class CSVUpload extends VerticalLayout {
                 });
               //  System.out.println("File Name is "+fileName+", length is "+contentLength+" mime Type is : "+mimeType);
             });
+
 
 
             add(upload,save,grid);
@@ -72,6 +70,11 @@ public class CSVUpload extends VerticalLayout {
     }
 
 
+    public void getAllList(){
+            List<CustomerResponse> customerResponses = getAllCustomer();
+            grid.setItems(customerResponses);
+
+    }
     private void sentBackEnd(InputStream file) throws IOException {
 
        List<CustomerRequest> getList= CsvTOCustomer(file);
