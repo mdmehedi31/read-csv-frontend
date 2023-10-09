@@ -17,7 +17,6 @@ import org.apache.commons.csv.CSVRecord;
 
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -115,6 +114,10 @@ public class CSVUpload extends VerticalLayout {
             String serverUrl= "http://localhost:8082/csv/get-all-customer";
         ResponseEntity<List<CustomerResponse>> customerList= restTemplate.exchange(serverUrl, HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerResponse>>(){});
         List<CustomerResponse> responses = customerList.getBody();
+
+        for (CustomerResponse response: responses){
+            System.out.println("-> "+response.getCompanyName()+" => "+response.getNumberOfEmployees()+" --> "+response.getEmployeesRating());
+        }
         return responses;
     }
 
@@ -132,17 +135,17 @@ public class CSVUpload extends VerticalLayout {
 
         for (CSVRecord record : csvParser) {
 
-            String name= record.get(0);
+            String companyName= record.get(0);
 
             String empValue= record.get(1);
             empValue=empValue.trim();
-            int employees = Integer.valueOf(empValue);
-            double rating= Double.parseDouble(record.get(2));
+            int numberOfEmployees = Integer.valueOf(empValue);
+            double companyRating= Double.parseDouble(record.get(2));
 
             CustomerRequest customerRequest = new CustomerRequest();
-            customerRequest.setName(name);
-            customerRequest.setEmployees(employees);
-            customerRequest.setRating(rating);
+            customerRequest.setCompanyName(companyName);
+            customerRequest.setNumberOfEmployees(numberOfEmployees);
+            customerRequest.setCompanyRating(companyRating);
 
             customerList.add(customerRequest);
         }

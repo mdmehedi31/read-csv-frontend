@@ -5,12 +5,16 @@ import java.util.Date;
 
 public class CustomerRequest {
 
-
     private Date created;
-    private String name;
-    private int employees;
-    private double rating;
+    private String companyName;
+    private int numberOfEmployees;
+    private double companyRating;
 
+//    public CustomerRequest(String name, int employees, double rating) {
+//        this.name = name;
+//        this.employees = employees;
+//        this.rating = rating;
+//    }
 
 
     public Date getCreated() {
@@ -21,27 +25,27 @@ public class CustomerRequest {
         this.created = new Date();
     }
 
-    public String getName() {
-        return name;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
-    public int getEmployees() {
-        return employees;
+    public int getNumberOfEmployees() {
+        return numberOfEmployees;
     }
 
-    public void setEmployees(int employees) {
-        this.employees = employees;
+    public void setNumberOfEmployees(int employees) {
+        this.numberOfEmployees = employees;
     }
 
-    public double getRating() {
-        return rating;
+    public double getCompanyRating() {
+        return companyRating;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setCompanyRating(double rating) {
+        this.companyRating = rating;
     }
 }
