@@ -7,8 +7,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.shared.util.SharedUtil;
+import com.vaadin.flow.component.upload.Upload;;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Route("")
-@Configuration
 public class CSVUpload extends VerticalLayout {
 
 
@@ -38,6 +36,12 @@ public class CSVUpload extends VerticalLayout {
 
     private final Grid<CustomerResponse> grid = new Grid<>(CustomerResponse.class);
 
+    /*
+    * this code load the UI, which contain upload field and data table view.
+    * Here i use MultiFileMemoryBuffer for take input the csv file.
+    * and then it's sent it to CsvToCustomer() method to parsing the data from CSV to
+    * raw data.
+    * */
         public CSVUpload() {
 
             MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
@@ -64,6 +68,10 @@ public class CSVUpload extends VerticalLayout {
             add(upload,save,grid);
     }
 
+
+    /*
+    * after loading the CSV file its show a notification
+    * */
     private void notificationStyle(){
         Notification notification = Notification.show("File Uploaded Successfully");
         notification.setPosition(Notification.Position.TOP_CENTER);
@@ -71,11 +79,21 @@ public class CSVUpload extends VerticalLayout {
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
+    /*
+    * this is Showing the all data in a tabular format in the frontend.
+    * here, I used to @PostConstruct annotation to loading the data, when UI
+    * Page is load, it means that this method call after the UI design loaded.
+    * */
     @PostConstruct
     public void getAllList(){
             List<CustomerResponse> customerResponses = getAllCustomer();
             grid.setItems(customerResponses);
     }
+
+    /*
+    * In this method i Integrated a backend API which sent the list data in the backend
+    * Here i create API using RestTemplate;
+    * */
     private void sentBackEnd(InputStream file) throws IOException {
 
        List<CustomerRequest> getList= CsvTOCustomer(file);
@@ -88,23 +106,19 @@ public class CSVUpload extends VerticalLayout {
     }
 
 
-
+    /*
+    * Fetching list of company data using this method.
+    * */
     public List<CustomerResponse> getAllCustomer(){
 
             RestTemplate restTemplate = new RestTemplate();
             String serverUrl= "http://localhost:8082/csv/get-all-customer";
-
         ResponseEntity<List<CustomerResponse>> customerList= restTemplate.exchange(serverUrl, HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerResponse>>(){});
-
         List<CustomerResponse> responses = customerList.getBody();
-
         return responses;
     }
 
-
     public List<CustomerRequest> CsvTOCustomer(InputStream file) throws IOException {
-
-
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file, "UTF-8"));
 
