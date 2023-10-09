@@ -105,13 +105,13 @@ public class CSVUpload extends VerticalLayout {
 
         List<CustomerResponse> responses = customerList.getBody();
 
-        int i=1;
-        for (CustomerResponse response1: responses){
-
-            System.out.println(i+" th  Name "+response1.getName()+", Employees "+response1.getEmployees()+", Rating "+response1.getRating());
-
-            i++;
-        }
+//        int i=1;
+//        for (CustomerResponse response1: responses){
+//
+//            System.out.println(i+" th  Name "+response1.getName()+", Employees "+response1.getEmployees()+", Rating "+response1.getRating());
+//
+//            i++;
+//        }
 
         return responses;
     }
