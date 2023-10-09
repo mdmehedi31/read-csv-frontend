@@ -140,12 +140,12 @@ public class CSVUpload extends VerticalLayout {
             String empValue= record.get(1);
             empValue=empValue.trim();
             int numberOfEmployees = Integer.valueOf(empValue);
-            double companyRating= Double.parseDouble(record.get(2));
+            double employeesRating= Double.parseDouble(record.get(2));
 
             CustomerRequest customerRequest = new CustomerRequest();
             customerRequest.setCompanyName(companyName);
             customerRequest.setNumberOfEmployees(numberOfEmployees);
-            customerRequest.setCompanyRating(companyRating);
+            customerRequest.setEmployeesRating(employeesRating);
 
             customerList.add(customerRequest);
         }

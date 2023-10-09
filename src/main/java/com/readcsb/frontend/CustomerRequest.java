@@ -8,7 +8,7 @@ public class CustomerRequest {
     private Date created;
     private String companyName;
     private int numberOfEmployees;
-    private double companyRating;
+    private double employeesRating;
 
 //    public CustomerRequest(String name, int employees, double rating) {
 //        this.name = name;
@@ -41,11 +41,11 @@ public class CustomerRequest {
         this.numberOfEmployees = employees;
     }
 
-    public double getCompanyRating() {
-        return companyRating;
+    public double getEmployeesRating() {
+        return employeesRating;
     }
 
-    public void setCompanyRating(double rating) {
-        this.companyRating = rating;
+    public void setEmployeesRating(double rating) {
+        this.employeesRating = rating;
     }
 }
