@@ -7,6 +7,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.shared.util.SharedUtil;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -70,6 +71,7 @@ public class CSVUpload extends VerticalLayout {
     }
 
 
+    @PostConstruct
     public void getAllList(){
             List<CustomerResponse> customerResponses = getAllCustomer();
             grid.setItems(customerResponses);
