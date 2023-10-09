@@ -4,6 +4,8 @@ package com.readcsb.frontend;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.shared.util.SharedUtil;
@@ -44,38 +46,35 @@ public class CSVUpload extends VerticalLayout {
             upload.addSucceededListener(event -> {
                 String fileName = event.getFileName();
                 InputStream inputStream = buffer.getInputStream(fileName);
-
+                notificationStyle();
                 save.addClickListener(Click-> {
                     try {
+
                         sentBackEnd(inputStream);
                         getAllList();
+                        upload.clearFileList();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
-              //  System.out.println("File Name is "+fileName+", length is "+contentLength+" mime Type is : "+mimeType);
             });
-
-
 
             add(upload,save,grid);
     }
 
-
-
-    private void listView(){
-            grid.setColumns("Name","Employees","Rating");
-        grid.asSingleSelect().addValueChangeListener(event ->event.getValue());
+    private void notificationStyle(){
+        Notification notification = Notification.show("File Uploaded Successfully");
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(3000);
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
-
 
     @PostConstruct
     public void getAllList(){
             List<CustomerResponse> customerResponses = getAllCustomer();
             grid.setItems(customerResponses);
-
     }
     private void sentBackEnd(InputStream file) throws IOException {
 
@@ -86,10 +85,6 @@ public class CSVUpload extends VerticalLayout {
         String serverUrl="http://localhost:8082/csv/upload-csv";
 
         String getResponse= restTemplate.postForObject(serverUrl,getList,String.class);
-
-        System.out.println("Your response Type is : "+getResponse);
-
-
     }
 
 
@@ -97,21 +92,11 @@ public class CSVUpload extends VerticalLayout {
     public List<CustomerResponse> getAllCustomer(){
 
             RestTemplate restTemplate = new RestTemplate();
-
-            List<CustomerResponse> getCustomerList= new ArrayList<>();
             String serverUrl= "http://localhost:8082/csv/get-all-customer";
 
         ResponseEntity<List<CustomerResponse>> customerList= restTemplate.exchange(serverUrl, HttpMethod.GET,null, new ParameterizedTypeReference<List<CustomerResponse>>(){});
 
         List<CustomerResponse> responses = customerList.getBody();
-
-//        int i=1;
-//        for (CustomerResponse response1: responses){
-//
-//            System.out.println(i+" th  Name "+response1.getName()+", Employees "+response1.getEmployees()+", Rating "+response1.getRating());
-//
-//            i++;
-//        }
 
         return responses;
     }
@@ -149,6 +134,5 @@ public class CSVUpload extends VerticalLayout {
         }
         return customerList;
     }
-
 
 }
