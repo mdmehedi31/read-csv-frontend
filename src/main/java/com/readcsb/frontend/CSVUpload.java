@@ -163,7 +163,7 @@ public class CSVUpload extends VerticalLayout {
             double employeesRating= Double.parseDouble(record.get(2));
 
             if(companyName.contains("/")){
-               List<String> getAllBranchCompanyName= getCompanyAllBranchNameList(companyName);
+               List<String> getAllBranchCompanyName= getCompanyNameWithBranchName(companyName);
 
                for (String name: getAllBranchCompanyName){
 
@@ -186,7 +186,7 @@ public class CSVUpload extends VerticalLayout {
         return customerList;
     }
 
-    private List<String> getCompanyAllBranchNameList(String companyName) {
+    private List<String> getCompanyNameWithBranchName(String companyName) {
 
         List<String> getSplitCompanyNameList= getCompanyNameListWithBranch(companyName);
         return getSplitCompanyNameList;
@@ -196,6 +196,7 @@ public class CSVUpload extends VerticalLayout {
 
         String[] splitName=companyName.split("[/]");
         List<String> companyNameWithBranchList= new ArrayList<>();
+
         String companyNameWithOutBranch= getCompanyName(splitName[0]);
 
         companyNameWithBranchList.add(splitName[0]);
