@@ -157,20 +157,73 @@ public class CSVUpload extends VerticalLayout {
         for (CSVRecord record : csvParser) {
 
             String companyName= record.get(0);
-
             String empValue= record.get(1);
             empValue=empValue.trim();
             int numberOfEmployees = Integer.valueOf(empValue);
             double employeesRating= Double.parseDouble(record.get(2));
 
-            CustomerRequest customerRequest = new CustomerRequest();
-            customerRequest.setCompanyName(companyName);
-            customerRequest.setNumberOfEmployees(numberOfEmployees);
-            customerRequest.setEmployeesRating(employeesRating);
+            if(companyName.contains("/")){
+               List<String> getAllBranchCompanyName= getCompanyAllBranchNameList(companyName);
 
-            customerList.add(customerRequest);
+               for (String name: getAllBranchCompanyName){
+
+                   CustomerRequest customerRequest = new CustomerRequest();
+                   customerRequest.setCompanyName(name);
+                   customerRequest.setNumberOfEmployees(numberOfEmployees);
+                   customerRequest.setEmployeesRating(employeesRating);
+                   customerList.add(customerRequest);
+               }
+            }else{
+
+                CustomerRequest customerRequest = new CustomerRequest();
+                customerRequest.setCompanyName(companyName);
+                customerRequest.setNumberOfEmployees(numberOfEmployees);
+                customerRequest.setEmployeesRating(employeesRating);
+
+                customerList.add(customerRequest);
+            }
         }
         return customerList;
+    }
+
+    private List<String> getCompanyAllBranchNameList(String companyName) {
+
+        List<String> getSplitCompanyNameList= getCompanyNameListWithBranch(companyName);
+        return getSplitCompanyNameList;
+    }
+
+    private List<String> getCompanyNameListWithBranch(String companyName) {
+
+        String[] splitName=companyName.split("[/]");
+        List<String> companyNameWithBranchList= new ArrayList<>();
+        String companyNameWithOutBranch= getCompanyName(splitName[0]);
+
+        companyNameWithBranchList.add(splitName[0]);
+        for (int i=1;i<splitName.length;i++){
+
+            String fullCompanyNameWithBranch="";
+            fullCompanyNameWithBranch=companyNameWithOutBranch+" "+splitName[i];
+            companyNameWithBranchList.add(fullCompanyNameWithBranch);
+        }
+
+        return companyNameWithBranchList;
+    }
+
+    private String getCompanyName(String name) {
+
+        String[] splitCompanyName=name.split("[ ]");
+        String nameWithOutBranch="";
+        for (int i=0; i<splitCompanyName.length-1;i++){
+
+            if(i==0){
+                nameWithOutBranch+=splitCompanyName[i];
+            }
+            else{
+                nameWithOutBranch+=" "+splitCompanyName[i];
+            }
+        }
+
+        return nameWithOutBranch;
     }
 
 }
