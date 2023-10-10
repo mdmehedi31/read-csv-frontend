@@ -46,38 +46,59 @@ public class CSVUpload extends VerticalLayout {
             MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
             Upload upload = new Upload(buffer);
 
+
             upload.addSucceededListener(event -> {
                 String fileName = event.getFileName();
-                InputStream inputStream = buffer.getInputStream(fileName);
-                notificationStyle();
-                save.addClickListener(Click-> {
-                    try {
+                if(isCSV(fileName)){
 
-                        sentBackEnd(inputStream);
-                        getAllList();
-                        upload.clearFileList();
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                    InputStream inputStream = buffer.getInputStream(fileName);
+                    successNotification();
+                    save.addClickListener(Click-> {
+                        try {
+
+                            sentBackEnd(inputStream);
+                            getAllList();
+                            upload.clearFileList();
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+                else {
+                    warningNotification();
+                }
+
             });
 
             add(upload,save,grid);
+    }
+
+    private boolean isCSV(String fileName) {
+        if (fileName != null && fileName.toLowerCase().endsWith(".csv")) {
+            return true;
+        }
+        return false;
     }
 
 
     /*
     * after loading the CSV file its show a notification
     * */
-    private void notificationStyle(){
+    private void successNotification(){
         Notification notification = Notification.show("File Uploaded Successfully");
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(3000);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
+    private void warningNotification(){
+        Notification notification = Notification.show("Invalid FIle Type");
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(3000);
+        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+    }
     /*
     * this is Showing the all data in a tabular format in the frontend.
     * here, I used to @PostConstruct annotation to loading the data, when UI
