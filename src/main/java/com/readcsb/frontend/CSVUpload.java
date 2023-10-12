@@ -2,9 +2,6 @@ package com.readcsb.frontend;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.helger.commons.collection.impl.ICommonsList;
-import com.helger.commons.csv.CSVReader;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
@@ -12,12 +9,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
-
-
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
 import org.springframework.core.ParameterizedTypeReference;
@@ -164,7 +155,6 @@ public class CSVUpload extends VerticalLayout {
         return responses;
     }
 
-    //List<CSVRecord>
 
     public List<String[]> CsvTOCustomer(InputStream file) throws IOException {
 
@@ -193,46 +183,46 @@ public class CSVUpload extends VerticalLayout {
         return records;
     }
 
-    private List<String> getCompanyNameWithBranchName(String companyName) {
-
-        List<String> getSplitCompanyNameList= getCompanyNameListWithBranch(companyName);
-        return getSplitCompanyNameList;
-    }
-
-    private List<String> getCompanyNameListWithBranch(String companyName) {
-
-        String[] splitName=companyName.split("[/]");
-        List<String> companyNameWithBranchList= new ArrayList<>();
-
-        String companyNameWithOutBranch= getCompanyName(splitName[0]);
-
-        companyNameWithBranchList.add(splitName[0]);
-        for (int i=1;i<splitName.length;i++){
-
-            String fullCompanyNameWithBranch="";
-            fullCompanyNameWithBranch=companyNameWithOutBranch+" "+splitName[i];
-            companyNameWithBranchList.add(fullCompanyNameWithBranch);
-        }
-
-        return companyNameWithBranchList;
-    }
-
-    private String getCompanyName(String name) {
-
-        String[] splitCompanyName=name.split("[ ]");
-        String nameWithOutBranch="";
-        for (int i=0; i<splitCompanyName.length-1;i++){
-
-            if(i==0){
-                nameWithOutBranch+=splitCompanyName[i];
-            }
-            else{
-                nameWithOutBranch+=" "+splitCompanyName[i];
-            }
-        }
-
-        return nameWithOutBranch;
-    }
+//    private List<String> getCompanyNameWithBranchName(String companyName) {
+//
+//        List<String> getSplitCompanyNameList= getCompanyNameListWithBranch(companyName);
+//        return getSplitCompanyNameList;
+//    }
+//
+//    private List<String> getCompanyNameListWithBranch(String companyName) {
+//
+//        String[] splitName=companyName.split("[/]");
+//        List<String> companyNameWithBranchList= new ArrayList<>();
+//
+//        String companyNameWithOutBranch= getCompanyName(splitName[0]);
+//
+//        companyNameWithBranchList.add(splitName[0]);
+//        for (int i=1;i<splitName.length;i++){
+//
+//            String fullCompanyNameWithBranch="";
+//            fullCompanyNameWithBranch=companyNameWithOutBranch+" "+splitName[i];
+//            companyNameWithBranchList.add(fullCompanyNameWithBranch);
+//        }
+//
+//        return companyNameWithBranchList;
+//    }
+//
+//    private String getCompanyName(String name) {
+//
+//        String[] splitCompanyName=name.split("[ ]");
+//        String nameWithOutBranch="";
+//        for (int i=0; i<splitCompanyName.length-1;i++){
+//
+//            if(i==0){
+//                nameWithOutBranch+=splitCompanyName[i];
+//            }
+//            else{
+//                nameWithOutBranch+=" "+splitCompanyName[i];
+//            }
+//        }
+//
+//        return nameWithOutBranch;
+//    }
 
 }
 
