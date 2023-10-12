@@ -2,6 +2,9 @@ package com.readcsb.frontend;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helger.commons.collection.impl.ICommonsList;
+import com.helger.commons.csv.CSVReader;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,8 +21,7 @@ import org.apache.commons.csv.CSVRecord;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -56,7 +58,8 @@ public class CSVUpload extends VerticalLayout {
                     save.addClickListener(Click-> {
                         try {
 
-                            sentBackEnd(inputStream);
+                           String responseMessage= sentBackEnd(inputStream);
+                           saveSuccessNotification(responseMessage);
                             getAllList();
                             upload.clearFileList();
                         } catch (JsonProcessingException e) {
@@ -82,14 +85,20 @@ public class CSVUpload extends VerticalLayout {
         return false;
     }
 
-
     /*
     * after loading the CSV file its show a notification
     * */
     private void successNotification(){
         Notification notification = Notification.show("File Uploaded Successfully");
         notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(3000);
+        notification.setDuration(2000);
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    private void saveSuccessNotification(String responseMessage){
+        Notification notification = Notification.show(responseMessage);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(3500);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
@@ -113,16 +122,29 @@ public class CSVUpload extends VerticalLayout {
     /*
     * In this method i Integrated a backend API which sent the list data in the backend
     * Here i create API using RestTemplate;
-    * */
-    private void sentBackEnd(InputStream file) throws IOException {
+    * HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
 
-       List<CustomerRequest> getList= CsvTOCustomer(file);
+        HttpEntity<CSVParser> httpEntity = new HttpEntity<>(csvParser, headers);
+
+        String response = restTemplate.postForObject("http://localhost:8080/csv/upload-csv", httpEntity, String.class);
+
+        System.out.println(response);
+    * */
+    private String sentBackEnd(InputStream file) throws IOException {
+
+       List<String[]> getList= CsvTOCustomer(file);
+
 
         RestTemplate restTemplate= new RestTemplate();
 
         String serverUrl="http://localhost:8082/csv/upload-csv";
 
         String getResponse= restTemplate.postForObject(serverUrl,getList,String.class);
+
+        System.out.println("response is "+getResponse);
+
+        return getResponse;
     }
 
 
@@ -142,48 +164,33 @@ public class CSVUpload extends VerticalLayout {
         return responses;
     }
 
-    public List<CustomerRequest> CsvTOCustomer(InputStream file) throws IOException {
+    //List<CSVRecord>
 
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file, "UTF-8"));
+    public List<String[]> CsvTOCustomer(InputStream file) throws IOException {
+
+        List<String[]> records = new ArrayList<>();
 
 
-        CSVFormat format = CSVFormat.RFC4180.builder().setAllowMissingColumnNames(true).
-                setHeader("Name","Employees","Rating").setSkipHeaderRecord(true).build();
+        try(BufferedReader bufferedReader= new BufferedReader(new InputStreamReader(file))) {
+            String line;
+            while ((line=bufferedReader.readLine())!=null) {
+                String[] row = line.split(",");
 
-        CSVParser csvParser = new CSVParser(bufferedReader, format);
-
-        List<CustomerRequest> customerList= new ArrayList<>();
-
-        for (CSVRecord record : csvParser) {
-
-            String companyName= record.get(0);
-            String empValue= record.get(1);
-            empValue=empValue.trim();
-            int numberOfEmployees = Integer.valueOf(empValue);
-            double employeesRating= Double.parseDouble(record.get(2));
-
-            if(companyName.contains("/")){
-               List<String> getAllBranchCompanyName= getCompanyNameWithBranchName(companyName);
-
-               for (String name: getAllBranchCompanyName){
-
-                   CustomerRequest customerRequest = new CustomerRequest();
-                   customerRequest.setCompanyName(name);
-                   customerRequest.setNumberOfEmployees(numberOfEmployees);
-                   customerRequest.setEmployeesRating(employeesRating);
-                   customerList.add(customerRequest);
-               }
-            }else{
-
-                CustomerRequest customerRequest = new CustomerRequest();
-                customerRequest.setCompanyName(companyName);
-                customerRequest.setNumberOfEmployees(numberOfEmployees);
-                customerRequest.setEmployeesRating(employeesRating);
-
-                customerList.add(customerRequest);
+                records.add(row);
             }
         }
-        return customerList;
+        catch (IOException e) {
+                e.printStackTrace();
+        }
+
+        for (String[] row : records){
+            for (String cell : row){
+                System.out.println(cell+"\t");
+            }
+            System.out.println();
+        }
+
+        return records;
     }
 
     private List<String> getCompanyNameWithBranchName(String companyName) {
@@ -228,3 +235,37 @@ public class CSVUpload extends VerticalLayout {
     }
 
 }
+
+
+
+// Previous code
+//        for (CSVRecord record : csvParser) {
+//
+//            String companyName= record.get(0);
+//            int empValue= Integer.parseInt(record.get(1));
+//           // String empVal=empValue.trim();
+//
+//            int numberOfEmployees = Integer.parseInt(empValue);
+//            double employeesRating= Double.parseDouble(record.get(2));
+
+//            if(companyName.contains("/")){
+//               List<String> getAllBranchCompanyName= getCompanyNameWithBranchName(companyName);
+//
+//               for (String name: getAllBranchCompanyName){
+//
+//                   CustomerRequest customerRequest = new CustomerRequest();
+//                   customerRequest.setCompanyName(name);
+//                   customerRequest.setNumberOfEmployees(numberOfEmployees);
+//                   customerRequest.setEmployeesRating(employeesRating);
+//                   customerList.add(customerRequest);
+//               }
+//            }else{
+//
+//                CustomerRequest customerRequest = new CustomerRequest();
+//                customerRequest.setCompanyName(companyName);
+//                customerRequest.setNumberOfEmployees(numberOfEmployees);
+//                customerRequest.setEmployeesRating(employeesRating);
+//
+//                customerList.add(customerRequest);
+//            }
+//        }
